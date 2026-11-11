@@ -28,6 +28,14 @@ local CHECKPOINTS    = cfg.printcheckpoints    or false
 local PRINT_TIME     = cfg.printtesttimetaken  or false
 local FILTER         = cfg.functionstotest     -- nil = run all
 
+print([[ 
+
+╔══════════════════════════════════════════════╗
+║  sUNC · senS' Unified Naming Convention      ║
+║  81 tests · 13 categories · unobfuscated     ║
+╚══════════════════════════════════════════════╝
+]])
+
 -- ───────────────────────────────────────────────────────────
 --  Result tracking
 -- ───────────────────────────────────────────────────────────
@@ -44,16 +52,23 @@ end
 
 local function fail(name, reason)
     results.failed += 1
-    warn(string.format("[sUNC] ❌ %s%s", name, reason and (" — " .. tostring(reason)) or ""))
+    warn(string.format("[sUNC] ❌ %s", name))
+    if reason then
+        warn(string.format("[sUNC]    └─ %s", tostring(reason)))
+    end
 end
 
 local function untested(name)
     results.untested += 1
-    print(string.format("[sUNC] ⬜ %s (not supported)", name))
+    print(string.format("[sUNC] ⬜ %s — not supported", name))
 end
 
 local function checkpoint(msg)
     if CHECKPOINTS then print("[sUNC][cp] " .. msg) end
+end
+
+local function banner(title)
+    print("\n── " .. title .. " " .. string.rep("─", math.max(1, 44 - #title)))
 end
 
 -- ───────────────────────────────────────────────────────────
@@ -109,7 +124,7 @@ end
 -- ───────────────────────────────────────────────────────────
 --  CLOSURES
 -- ───────────────────────────────────────────────────────────
-print("\n── Closures ──")
+banner("Closures")
 
 run("iscclosure", "Closures", function()
     assert2(iscclosure ~= nil, "iscclosure missing")
@@ -205,7 +220,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  DEBUG
 -- ───────────────────────────────────────────────────────────
-print("\n── Debug ──")
+banner("Debug")
 
 run("debug.getconstants", "Debug", function()
     assert2(debug.getconstants ~= nil, "debug.getconstants missing")
@@ -306,7 +321,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  DRAWING
 -- ───────────────────────────────────────────────────────────
-print("\n── Drawing ──")
+banner("Drawing")
 
 run("Drawing.new", "Drawing.new", function()
     assert2(Drawing ~= nil, "Drawing missing")
@@ -349,7 +364,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  ENCODING
 -- ───────────────────────────────────────────────────────────
-print("\n── Encoding ──")
+banner("Encoding")
 
 run("base64encode", "Encoding", function()
     assert2(base64encode ~= nil, "base64encode missing")
@@ -387,7 +402,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  ENVIRONMENT
 -- ───────────────────────────────────────────────────────────
-print("\n── Environment ──")
+banner("Environment")
 
 run("getgenv", "Environment", function()
     assert2(getgenv ~= nil, "getgenv missing")
@@ -442,7 +457,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  FILESYSTEM
 -- ───────────────────────────────────────────────────────────
-print("\n── Filesystem ──")
+banner("Filesystem")
 
 local FS_FOLDER = "sUNCtest"
 local FS_FILE   = FS_FOLDER .. "/test.txt"
@@ -537,7 +552,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  INSTANCES
 -- ───────────────────────────────────────────────────────────
-print("\n── Instances ──")
+banner("Instances")
 
 run("getinstances", "Instances", function()
     assert2(getinstances ~= nil, "getinstances missing")
@@ -628,7 +643,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  METATABLE
 -- ───────────────────────────────────────────────────────────
-print("\n── Metatable ──")
+banner("Metatable")
 
 run("getrawmetatable", "Metatable", function()
     assert2(getrawmetatable ~= nil, "getrawmetatable missing")
@@ -692,7 +707,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  MISCELLANEOUS
 -- ───────────────────────────────────────────────────────────
-print("\n── Miscellaneous ──")
+banner("Miscellaneous")
 
 run("identifyexecutor", "Miscellaneous", function()
     assert2(identifyexecutor ~= nil, "identifyexecutor missing")
@@ -716,7 +731,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  REFLECTION
 -- ───────────────────────────────────────────────────────────
-print("\n── Reflection ──")
+banner("Reflection")
 
 run("getthreadidentity", "Reflection", function()
     assert2(getthreadidentity ~= nil or getidentity ~= nil, "getthreadidentity missing")
@@ -776,7 +791,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  SCRIPTS
 -- ───────────────────────────────────────────────────────────
-print("\n── Scripts ──")
+banner("Scripts")
 
 run("getscripts", "Scripts", function()
     assert2(getscripts ~= nil, "getscripts missing")
@@ -868,7 +883,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  SIGNALS
 -- ───────────────────────────────────────────────────────────
-print("\n── Signals ──")
+banner("Signals")
 
 run("getconnections", "Signals", function()
     assert2(getconnections ~= nil, "getconnections missing")
@@ -906,7 +921,7 @@ end)
 -- ───────────────────────────────────────────────────────────
 --  WEBSOCKET
 -- ───────────────────────────────────────────────────────────
-print("\n── WebSocket ──")
+banner("WebSocket")
 
 run("WebSocket.connect", "WebSocket", function()
     assert2(WebSocket ~= nil, "WebSocket missing")
@@ -934,13 +949,27 @@ end)
 --  RESULTS SUMMARY
 -- ───────────────────────────────────────────────────────────
 task.wait(0.1)
-local total = results.passed + results.failed + results.untested
-local score = total > 0 and math.floor((results.passed / (results.passed + results.failed)) * 100) or 0
+local total  = results.passed + results.failed + results.untested
+local tested = results.passed + results.failed
+local score  = tested > 0 and math.floor((results.passed / tested) * 100 + 0.5) or 0
 
-print(string.rep("─", 40))
-print(string.format("[sUNC] Results for: %s", (identifyexecutor and identifyexecutor() or "unknown")))
-print(string.format("[sUNC] Passed    : %d", results.passed))
-print(string.format("[sUNC] Failed    : %d", results.failed))
-print(string.format("[sUNC] Untested  : %d", results.untested))
-print(string.format("[sUNC] Score     : %d%% (%d / %d tested)", score, results.passed, results.passed + results.failed))
-print(string.rep("─", 40))
+local function bar(width, filled)
+    return string.rep("█", filled) .. string.rep("░", width - filled)
+end
+
+local W    = 46
+local BARW = W - 18
+local exec = tostring(identifyexecutor and identifyexecutor() or "unknown")
+
+print(string.rep("═", W))
+print(string.format("  sUNC RESULTS — %s", exec))
+print(string.rep("═", W))
+print(string.format("  %-9s: %d", "Passed",   results.passed))
+print(string.format("  %-9s: %d", "Failed",   results.failed))
+print(string.format("  %-9s: %d", "Untested", results.untested))
+print(string.format("  %-9s: %d", "Total",    total))
+print("  " .. string.rep("─", W - 4))
+print(string.format("  %-9s: %s %3d%%", "Score",
+    bar(BARW, math.floor(score / 100 * BARW + 0.5)), score))
+print(string.format("             %d / %d tests passed", results.passed, tested))
+print(string.rep("═", W))
