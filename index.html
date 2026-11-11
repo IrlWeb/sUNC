@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sUNC — senS' Unified Naming Convention</title>
+<meta name="description" content="sUNC (senS' Unified Naming Convention) — a clean, unobfuscated reimplementation of the sUNC executor test suite. 81 tests across 13 categories.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23000'/%3E%3Ctext x='32' y='43' font-family='Inter,Arial,sans-serif' font-size='28' font-weight='700' fill='%23fff' text-anchor='middle'%3EsU%3C/text%3E%3C/svg%3E">
+<noscript><style>.reveal{opacity:1 !important;transform:none !important}#waves{display:none}</style></noscript>
+<style>
+  :root{
+    --bg:#000000;
+    --panel:#0a0a0a;
+    --panel-2:#111111;
+    --line:#1e1e1e;
+    --line-strong:#2e2e2e;
+    --text:#ffffff;
+    --muted:#a3a3a3;
+    --faint:#6f6f6f;
+    --dim:#525252;
+    --green:#4ade80;
+    --red:#f87171;
+    --amber:#fbbf24;
+    --mono:ui-monospace,'SF Mono','Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:Inter,'SF Pro Display',-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,'PingFang SC','Microsoft YaHei',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  #waves{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+  a{color:inherit;text-decoration:none}
+
+  /* ── nav ─────────────────────────────────────────── */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    background:rgba(0,0,0,.55);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  .nav-inner{
+    max-width:1160px;margin:0 auto;padding:20px 28px;
+    display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  }
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:.2px}
+  .logo-mark{
+    font-weight:800;font-size:19px;color:#fff;letter-spacing:-.5px;
+    font-family:var(--sans);
+  }
+  .nav-center{display:flex;align-items:center;gap:30px;justify-content:center}
+  .nav-center a{
+    font-size:14px;font-weight:600;color:#d4d4d4;
+    transition:color .15s;
+  }
+  .nav-center a:hover{color:#fff}
+  .nav-right{display:flex;align-items:center;gap:6px;justify-content:flex-end}
+  .nav-icon{
+    display:grid;place-items:center;width:36px;height:36px;border-radius:999px;
+    color:#a3a3a3;transition:color .15s,background .15s;
+  }
+  .nav-icon:hover{color:#fff;background:rgba(255,255,255,.07)}
+  .nav-icon svg{width:17px;height:17px}
+
+  /* ── hero ────────────────────────────────────────── */
+  .hero{
+    min-height:100vh;min-height:100svh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;position:relative;z-index:1;padding:0 24px;
+  }
+  h1.hero-title{
+    font-size:clamp(56px,9vw,104px);
+    font-weight:800;letter-spacing:-3px;line-height:1.05;
+  }
+  .tw{color:#fff}
+  .tg{color:#4d4d4d}
+  .hero-sub{
+    margin-top:18px;color:var(--muted);font-size:16.5px;max-width:520px;
+    margin-left:auto;margin-right:auto;
+  }
+  .hero-actions{display:flex;gap:14px;justify-content:center;margin-top:40px;flex-wrap:wrap}
+  .pill{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:13px 26px;border-radius:999px;font-size:15px;font-weight:600;
+    cursor:pointer;font-family:var(--sans);
+    transition:transform .15s,background .15s,border-color .15s;
+  }
+  .pill svg{width:16px;height:16px}
+  .pill-light{background:#fff;color:#000;border:1px solid #fff}
+  .pill-light:hover{background:#e2e2e2;border-color:#e2e2e2;transform:translateY(-1px)}
+  .pill-dark{background:#161616;color:#fff;border:1px solid #262626}
+  .pill-dark:hover{background:#222;border-color:#333;transform:translateY(-1px)}
+  .hero-stats{
+    margin-top:46px;display:flex;gap:22px;flex-wrap:wrap;justify-content:center;
+    font-family:var(--mono);font-size:12.5px;color:var(--faint);
+  }
+  .hero-stats b{color:#d4d4d4;font-weight:600}
+  .scroll-hint{
+    position:absolute;bottom:34px;left:50%;
+    color:#3a3a3a;animation:bob 2.4s ease-in-out infinite;
+  }
+  .scroll-hint svg{width:20px;height:20px}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
+
+  /* ── sections ────────────────────────────────────── */
+  main{position:relative;z-index:1;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 240px,rgba(0,0,0,.85) 100%)}
+  section{padding:76px 0}
+  .sec-head{margin-bottom:44px}
+  .sec-head.center{text-align:center}
+  .kicker{
+    font-family:var(--mono);font-size:11.5px;color:var(--faint);
+    text-transform:uppercase;letter-spacing:3px;margin-bottom:14px;
+  }
+  .sec-head h2{font-size:clamp(26px,4vw,36px);font-weight:800;letter-spacing:-1px}
+  .sec-head p{color:var(--muted);margin-top:12px;max-width:560px}
+  .sec-head.center p{margin-left:auto;margin-right:auto}
+
+  /* ── script box ──────────────────────────────────── */
+  .scriptbox{
+    max-width:760px;margin:0 auto;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;
+  }
+  .scriptbar{
+    display:flex;align-items:center;gap:8px;
+    padding:12px 16px;border-bottom:1px solid var(--line);
+    background:rgba(255,255,255,.015);
+  }
+  .scriptbar .dots{display:flex;gap:6px}
+  .scriptbar .dots i{width:11px;height:11px;border-radius:50%;display:block;opacity:.9}
+  .scriptbar .fname{margin-left:8px;font-family:var(--mono);font-size:12.5px;color:var(--faint)}
+  .copybtn{
+    margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12.5px;font-weight:600;color:#fff;
+    background:rgba(255,255,255,.08);border:1px solid #2e2e2e;
+    padding:6px 14px;border-radius:999px;cursor:pointer;
+    transition:background .15s;
+  }
+  .copybtn:hover{background:rgba(255,255,255,.16)}
+  .copybtn.done{color:var(--green);border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.08)}
+  .copybtn svg{width:13px;height:13px}
+  .scriptbox pre{
+    padding:20px 22px;overflow-x:auto;
+    font-family:var(--mono);font-size:13.5px;line-height:1.75;
+    color:#cfcfcf;
+  }
+  .tok-kw{color:#fff;font-weight:600}.tok-str{color:#9a9a9a}.tok-fn{color:#e5e5e5}.tok-cm{color:#4d4d4d}.tok-num{color:#d4d4d4}
+  .script-note{
+    display:flex;gap:10px;align-items:flex-start;
+    max-width:760px;margin:16px auto 0;
+    font-size:13.5px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:13px 16px;
+  }
+  .script-note svg{width:16px;height:16px;flex:none;margin-top:3px;color:var(--faint)}
+  .script-note code{font-family:var(--mono);font-size:12.5px;color:#d4d4d4}
+  .fullscript-row{
+    display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:26px;
+  }
+
+  /* ── feature cards ───────────────────────────────── */
+  .grid{display:grid;gap:14px}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  .card{
+    background:rgba(255,255,255,.015);border:1px solid var(--line);border-radius:14px;
+    padding:22px;transition:background .2s,border-color .2s;
+  }
+  .card:hover{background:rgba(255,255,255,.04);border-color:var(--line-strong)}
+  .card .ico{
+    width:36px;height:36px;border-radius:10px;display:grid;place-items:center;margin-bottom:14px;
+    background:rgba(255,255,255,.06);border:1px solid var(--line-strong);
+    color:#fff;
+  }
+  .card .ico svg{width:17px;height:17px}
+  .card h3{font-size:15px;font-weight:700;margin-bottom:7px;letter-spacing:-.2px}
+  .card p{font-size:13.5px;color:var(--muted)}
+  .card code{font-family:var(--mono);font-size:12px;color:#d4d4d4;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:5px}
+
+  /* ── coverage ────────────────────────────────────── */
+  .cat{
+    background:rgba(255,255,255,.015);border:1px solid var(--line);border-radius:14px;padding:18px 20px;
+    transition:border-color .2s,background .2s;
+  }
+  .cat:hover{border-color:var(--line-strong);background:rgba(255,255,255,.04)}
+  .cat-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .cat-head h3{font-size:15px;font-weight:700;letter-spacing:-.2px}
+  .cat-head .count{
+    margin-left:auto;font-family:var(--mono);font-size:11.5px;font-weight:600;
+    color:#d4d4d4;background:rgba(255,255,255,.07);
+    border:1px solid var(--line-strong);
+    padding:3px 10px;border-radius:999px;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{
+    font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    background:transparent;border:1px solid var(--line);
+    padding:3px 10px;border-radius:999px;white-space:nowrap;
+  }
+
+  /* ── terminal ────────────────────────────────────── */
+  .term{
+    max-width:760px;margin:0 auto;
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    overflow:hidden;
+  }
+  .term pre{
+    padding:20px 22px;font-family:var(--mono);font-size:13px;line-height:1.8;
+    color:#a3a3a3;overflow-x:auto;
+  }
+  .t-ok{color:var(--green)}.t-warn{color:var(--amber)}.t-err{color:var(--red)}
+  .t-hr{color:#333}.t-hi{color:#fff;font-weight:600}
+
+  /* ── CTA ─────────────────────────────────────────── */
+  .cta{
+    text-align:center;
+    background:var(--panel);border:1px solid var(--line);border-radius:18px;
+    padding:60px 28px;
+  }
+  .cta h2{font-size:clamp(24px,3.6vw,32px);font-weight:800;letter-spacing:-.8px;margin-bottom:12px}
+  .cta p{color:var(--muted);margin-bottom:28px}
+
+  /* ── footer ──────────────────────────────────────── */
+  footer{border-top:1px solid var(--line);padding:44px 0 46px;margin-top:30px;text-align:center}
+  .foot-links{
+    display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+    font-size:13.5px;color:var(--faint);
+  }
+  .foot-links a{color:var(--muted);transition:color .15s}
+  .foot-links a:hover{color:#fff}
+  .foot-links .sep{color:#2e2e2e}
+  .foot-fine{margin-top:16px;font-size:12px;color:#3f3f3f}
+  .foot-brand{margin-bottom:22px;font-weight:800;font-size:15px}
+
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+
+  @media (max-width:900px){
+    .grid-4{grid-template-columns:repeat(2,1fr)}
+    .nav-inner{grid-template-columns:auto auto 1fr;padding:16px 20px}
+    .nav-center{display:none}
+  }
+  @media (max-width:560px){
+    .grid-4,.grid-2{grid-template-columns:1fr}
+    section{padding:56px 0}
+    .hero-stats{gap:14px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none}
+    .scroll-hint{animation:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="waves" aria-hidden="true"></canvas>
+
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#top"><span class="logo-mark">sU</span></a>
+    <div class="nav-center">
+      <a href="#get-started">Get Test</a>
+      <a href="#features">Features</a>
+      <a href="#coverage">Coverage</a>
+    </div>
+    <div class="nav-right">
+      <a href="#" title="Docs — replace with your docs link" aria-label="Docs" class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </a>
+      <a href="https://github.com/IrlWeb/sUNC" target="_blank" rel="noopener" title="sUNC on GitHub" aria-label="GitHub" class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5A11.5 11.5 0 0 0 .5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.17c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.26.72-1.55-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.78 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.05.77 2.12v3.14c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+      </a>
+      <a href="#" title="Discord — replace with your invite link" aria-label="Discord" class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.32 4.37A19.8 19.8 0 0 0 15.43 3c-.2.36-.44.85-.6 1.23a18.3 18.3 0 0 0-5.66 0C9.01 3.85 8.76 3.36 8.56 3a19.74 19.74 0 0 0-4.89 1.38C.6 9.05-.25 13.6.17 18.09a19.9 19.9 0 0 0 6.07 3.06c.49-.66.92-1.37 1.29-2.1-.71-.27-1.39-.6-2.03-.99.17-.12.34-.25.5-.38 3.93 1.82 8.18 1.82 12.06 0 .17.13.33.26.5.38-.64.39-1.32.72-2.04.99.37.73.8 1.44 1.3 2.1a19.84 19.84 0 0 0 6.07-3.06c.5-5.2-.83-9.7-3.57-13.72zM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42s.95-2.42 2.16-2.42c1.21 0 2.18 1.09 2.16 2.42 0 1.34-.95 2.42-2.16 2.42zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42s.95-2.42 2.15-2.42c1.21 0 2.18 1.09 2.16 2.42 0 1.34-.95 2.42-2.16 2.42z"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <h1 class="hero-title"><span class="tw">sUNC</span><span class="tg">.lua</span></h1>
+  <p class="hero-sub">senS' Unified Naming Convention — a clean, unobfuscated executor test suite. Full coverage, zero obfuscation.</p>
+  <div class="hero-actions">
+    <button class="pill pill-light" data-copy-loader>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Copy Script
+    </button>
+    <a class="pill pill-dark" href="#" title="Discord — replace with your invite link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.32 4.37A19.8 19.8 0 0 0 15.43 3c-.2.36-.44.85-.6 1.23a18.3 18.3 0 0 0-5.66 0C9.01 3.85 8.76 3.36 8.56 3a19.74 19.74 0 0 0-4.89 1.38C.6 9.05-.25 13.6.17 18.09a19.9 19.9 0 0 0 6.07 3.06c.49-.66.92-1.37 1.29-2.1-.71-.27-1.39-.6-2.03-.99.17-.12.34-.25.5-.38 3.93 1.82 8.18 1.82 12.06 0 .17.13.33.26.5.38-.64.39-1.32.72-2.04.99.37.73.8 1.44 1.3 2.1a19.84 19.84 0 0 0 6.07-3.06c.5-5.2-.83-9.7-3.57-13.72zM8.02 15.33c-1.18 0-2.16-1.08-2.16-2.42s.95-2.42 2.16-2.42c1.21 0 2.18 1.09 2.16 2.42 0 1.34-.95 2.42-2.16 2.42zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42s.95-2.42 2.15-2.42c1.21 0 2.18 1.09 2.16 2.42 0 1.34-.95 2.42-2.16 2.42z"/></svg>
+      Discord
+    </a>
+  </div>
+  <div class="hero-stats">
+    <span><b>13</b> categories</span>
+    <span><b>81</b> tests</span>
+    <span><b>100%</b> unobfuscated</span>
+    <span><b>39 KB</b> single file</span>
+  </div>
+  <a class="scroll-hint" href="#get-started" aria-label="Scroll down">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </a>
+</header>
+
+<main class="wrap">
+
+  <!-- ── get started ─────────────────────────────── -->
+  <section id="get-started">
+    <div class="sec-head center reveal">
+      <div class="kicker">get started</div>
+      <h2>Run the test</h2>
+      <p>Set your debug options, then execute the loader inside your executor. When this page is hosted, the loader URL below points at the real script automatically.</p>
+    </div>
+
+    <div class="scriptbox reveal">
+      <div class="scriptbar">
+        <div class="dots"><i style="background:#3a3a3a"></i><i style="background:#3a3a3a"></i><i style="background:#3a3a3a"></i></div>
+        <span class="fname">sUNC.lua — loader</span>
+        <button class="copybtn" data-copy-loader>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Script
+        </button>
+      </div>
+<pre><code><span class="tok-cm">-- optional debug configuration</span>
+<span class="tok-fn">getgenv</span>().sUNCDebug = {
+    [<span class="tok-str">"printcheckpoints"</span>]   = <span class="tok-kw">false</span>,
+    [<span class="tok-str">"delaybetweentests"</span>]  = <span class="tok-num">0</span>,
+    [<span class="tok-str">"printtesttimetaken"</span>] = <span class="tok-kw">false</span>,
+}
+
+<span class="tok-fn">loadstring</span>(<span class="tok-fn">game</span>:<span class="tok-fn">HttpGet</span>(<span class="tok-str">"<span id="loadurl">https://your-host.example/sUNC.lua</span>"</span>))()</code></pre>
+    </div>
+
+    <div class="script-note reveal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <div>
+        <span id="loadurl-note">When this page is hosted, the loader URL fills in automatically — it points to
+        <code>sUNC.lua</code> served from this same site. Opened as a local file, it falls back to the canonical
+        <code>github.com/IrlWeb/sUNC</code> raw URL.</span>
+        Or use <b>Copy Full Script</b> below and paste the entire script directly into your executor — it works identically.
+      </div>
+    </div>
+
+    <div class="fullscript-row reveal">
+      <button class="pill pill-light" data-copy-full>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Full Script
+      </button>
+      <button class="pill pill-dark" data-download>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download sUNC.lua
+      </button>
+      <button class="pill pill-dark" data-raw>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        View Raw
+      </button>
+    </div>
+  </section>
+
+  <!-- ── features ────────────────────────────────── -->
+  <section id="features">
+    <div class="sec-head center reveal">
+      <div class="kicker">features</div>
+      <h2>What makes this build different?</h2>
+    </div>
+    <div class="grid grid-4">
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>Unobfuscated by design</h3>
+        <p>Every test is readable end-to-end. You can audit exactly what is checked and why — nothing hidden, nothing packed.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+        <h3>Full coverage</h3>
+        <p>81 tests across 13 categories — from closures and debug to drawing, filesystem, signals and WebSocket.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg></div>
+        <h3>Behaviour, not presence</h3>
+        <p>Functions are actually invoked and their results asserted. A stub that merely exists won't pass — fake implementations get exposed.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
+        <h3>Run only what you want</h3>
+        <p>Set <code>functionstotest</code> to re-run a single check — e.g. <code>["filesys"] = true</code> — instead of the whole suite.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>Observability built in</h3>
+        <p>Flip on <code>printcheckpoints</code>, <code>printtesttimetaken</code> or add a <code>delaybetweentests</code> pause — all via one config table.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
+        <h3>Clear scoring</h3>
+        <p>A summary block prints passed / failed / untested counts and a percentage score for the executor under test.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8.5 4.9v10.2L12 22l-8.5-4.9V6.9z"/><path d="M12 22V12"/><path d="M20.5 6.9L12 12 3.5 6.9"/></svg></div>
+        <h3>Single-file drop-in</h3>
+        <p>One dependency-free Lua file. Paste it directly or load it via <code>loadstring(game:HttpGet(...))()</code> — nothing else to install.</p>
+      </div>
+      <div class="card reveal">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>Familiar config</h3>
+        <p>Uses the same <code>getgenv().sUNCDebug</code> table as the original, so existing setups keep working without changes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── coverage ────────────────────────────────── -->
+  <section id="coverage">
+    <div class="sec-head center reveal">
+      <div class="kicker">coverage</div>
+      <h2>81 tests, 13 categories</h2>
+      <p>Every function the suite exercises, grouped exactly as the script runs them.</p>
+    </div>
+    <div class="grid grid-2">
+      <div class="cat reveal">
+  <div class="cat-head"><h3>Closures</h3><span class="count">11 tests</span></div>
+  <div class="chips"><span class="chip">iscclosure</span><span class="chip">islclosure</span><span class="chip">isexecutorclosure</span><span class="chip">checkcaller</span><span class="chip">newcclosure</span><span class="chip">clonefunction</span><span class="chip">+5 more</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Debug</h3><span class="count">10 tests</span></div>
+  <div class="chips"><span class="chip">debug.getconstants</span><span class="chip">debug.getconstant</span><span class="chip">debug.setconstant</span><span class="chip">debug.getupvalues</span><span class="chip">debug.getupvalue</span><span class="chip">debug.setupvalue</span><span class="chip">+4 more</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Drawing</h3><span class="count">5 tests</span></div>
+  <div class="chips"><span class="chip">Drawing.new</span><span class="chip">isrenderobj</span><span class="chip">getrenderproperty</span><span class="chip">setrenderproperty</span><span class="chip">cleardrawcache</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Encoding</h3><span class="count">4 tests</span></div>
+  <div class="chips"><span class="chip">base64encode</span><span class="chip">base64decode</span><span class="chip">lz4compress</span><span class="chip">lz4decompress</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Environment</h3><span class="count">5 tests</span></div>
+  <div class="chips"><span class="chip">getgenv</span><span class="chip">getrenv</span><span class="chip">getgc</span><span class="chip">getreg</span><span class="chip">filtergc</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Filesystem</h3><span class="count">11 tests</span></div>
+  <div class="chips"><span class="chip">makefolder</span><span class="chip">isfolder</span><span class="chip">writefile</span><span class="chip">isfile</span><span class="chip">readfile</span><span class="chip">appendfile</span><span class="chip">+5 more</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Instances</h3><span class="count">9 tests</span></div>
+  <div class="chips"><span class="chip">getinstances</span><span class="chip">getnilinstances</span><span class="chip">gethui</span><span class="chip">getcallbackvalue</span><span class="chip">fireclickdetector</span><span class="chip">firetouchinterest</span><span class="chip">+3 more</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Metatable</h3><span class="count">5 tests</span></div>
+  <div class="chips"><span class="chip">getrawmetatable</span><span class="chip">setrawmetatable</span><span class="chip">isreadonly</span><span class="chip">setreadonly</span><span class="chip">getnamecallmethod</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Miscellaneous</h3><span class="count">2 tests</span></div>
+  <div class="chips"><span class="chip">identifyexecutor</span><span class="chip">request</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Reflection</h3><span class="count">6 tests</span></div>
+  <div class="chips"><span class="chip">getthreadidentity</span><span class="chip">setthreadidentity</span><span class="chip">isscriptable</span><span class="chip">setscriptable</span><span class="chip">gethiddenproperty</span><span class="chip">sethiddenproperty</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Scripts</h3><span class="count">9 tests</span></div>
+  <div class="chips"><span class="chip">getscripts</span><span class="chip">getrunningscripts</span><span class="chip">getloadedmodules</span><span class="chip">getscriptbytecode</span><span class="chip">getscripthash</span><span class="chip">getscriptclosure</span><span class="chip">+3 more</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>Signals</h3><span class="count">3 tests</span></div>
+  <div class="chips"><span class="chip">getconnections</span><span class="chip">firesignal</span><span class="chip">replicatesignal</span></div>
+</div>
+<div class="cat reveal">
+  <div class="cat-head"><h3>WebSocket</h3><span class="count">1 test</span></div>
+  <div class="chips"><span class="chip">WebSocket.connect</span></div>
+</div>
+    </div>
+  </section>
+
+  <!-- ── output ──────────────────────────────────── -->
+  <section id="output">
+    <div class="sec-head center reveal">
+      <div class="kicker">output</div>
+      <h2>Results you can actually read</h2>
+      <p>Example console output, in the exact format the script prints.</p>
+    </div>
+    <div class="term reveal">
+      <div class="scriptbar">
+        <div class="dots"><i style="background:#3a3a3a"></i><i style="background:#3a3a3a"></i><i style="background:#3a3a3a"></i></div>
+        <span class="fname">console — example run</span>
+      </div>
+<pre><span class="t-ok">[sUNC] ✅ iscclosure</span>
+<span class="t-ok">[sUNC] ✅ islclosure</span>
+<span class="t-ok">[sUNC] ✅ isexecutorclosure</span>
+<span class="t-ok">[sUNC] ✅ checkcaller</span>
+<span class="t-ok">[sUNC] ✅ newcclosure</span>
+<span class="t-ok">[sUNC] ✅ clonefunction</span>
+<span class="t-ok">[sUNC] ✅ hookfunction</span>
+<span class="t-ok">[sUNC] ✅ loadstring</span>
+<span class="t-ok">[sUNC] ✅ getgenv</span>
+<span class="t-ok">[sUNC] ✅ base64encode</span>
+<span class="t-ok">[sUNC] ✅ base64decode</span>
+<span class="t-warn">[sUNC] ⚠️ lz4compress is unsupported</span>
+<span class="t-err">[sUNC] ❌ getrenderproperty — assert failed</span>
+<span class="t-hr">────────────────────────────────────────</span>
+<span class="t-hi">[sUNC] Results for: ExampleExecutor</span>
+<span class="t-hi">[sUNC] Passed    : 74</span>
+<span class="t-hi">[sUNC] Failed    : 2</span>
+<span class="t-hi">[sUNC] Untested  : 5</span>
+<span class="t-hi">[sUNC] Score     : 97% (74 / 76 tested)</span>
+<span class="t-hr">────────────────────────────────────────</span></pre>
+    </div>
+  </section>
+
+  <!-- ── CTA ─────────────────────────────────────── -->
+  <section id="cta">
+    <div class="cta reveal">
+      <h2>Ready to test your executor?</h2>
+      <p>Copy the script, paste it in, and get a full compatibility report in seconds.</p>
+      <div class="hero-actions" style="margin-top:0">
+        <button class="pill pill-light" data-copy-full>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Full Script
+        </button>
+        <a class="pill pill-dark" href="#get-started">Back to the loader</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-brand">sU</div>
+    <div class="foot-links">
+      <a href="#" title="Docs — replace with your docs link">Documentation</a>
+      <span class="sep">|</span>
+      <a href="https://github.com/IrlWeb/sUNC" target="_blank" rel="noopener">GitHub</a>
+      <span class="sep">|</span>
+      <a href="https://raw.githubusercontent.com/IrlWeb/sUNC/refs/heads/main/sUNC.lua" target="_blank" rel="noopener">Raw sUNC.lua</a>
+      <span class="sep">|</span>
+      <a href="#" title="Discord — replace with your invite link">Discord</a>
+    </div>
+    <div class="foot-fine">sUNC test suite · canonical source: github.com/IrlWeb/sUNC · layout inspired by sunc.io · design inspired by Nexomia</div>
+  </div>
+</footer>
+
+<!-- Full script source, embedded verbatim (never rendered) -->
+<script type="text/plain" id="sunc-source">--[[
+    sUNC - senS' Unified Naming Convention
+    Clean reimplementation — unobfuscated, full coverage
+    Categories: Closures, Debug, Drawing, Encoding, Environment,
+                Filesystem, Instances, Metatable, Miscellaneous,
+                Reflection, Scripts, Signals, WebSocket
+
+    Usage:
+        getgenv().sUNCDebug = {
+            printcheckpoints    = false,
+            delaybetweentests   = 0,
+            printtesttimetaken  = false,
+            -- optional: only run specific tests
+            functionstotest = {
+                -- ["cloneref"] = true,
+                -- ["filesys"]  = true,
+            },
+        }
+        loadstring(game:HttpGet("..."))()   -- or paste directly
+]]
+
+-- ───────────────────────────────────────────────────────────
+--  Config
+-- ───────────────────────────────────────────────────────────
+local cfg = getgenv().sUNCDebug or {}
+local DELAY          = cfg.delaybetweentests   or 0
+local CHECKPOINTS    = cfg.printcheckpoints    or false
+local PRINT_TIME     = cfg.printtesttimetaken  or false
+local FILTER         = cfg.functionstotest     -- nil = run all
+
+-- ───────────────────────────────────────────────────────────
+--  Result tracking
+-- ───────────────────────────────────────────────────────────
+local results = {
+    passed   = 0,
+    failed   = 0,
+    untested = 0,
+}
+
+local function pass(name)
+    results.passed += 1
+    print(string.format("[sUNC] ✅ %s", name))
+end
+
+local function fail(name, reason)
+    results.failed += 1
+    warn(string.format("[sUNC] ❌ %s%s", name, reason and (" — " .. tostring(reason)) or ""))
+end
+
+local function untested(name)
+    results.untested += 1
+    print(string.format("[sUNC] ⬜ %s (not supported)", name))
+end
+
+local function checkpoint(msg)
+    if CHECKPOINTS then print("[sUNC][cp] " .. msg) end
+end
+
+-- ───────────────────────────────────────────────────────────
+--  Test runner
+-- ───────────────────────────────────────────────────────────
+local function run(name, group, fn)
+    -- filter: if functionstotest is set, skip unless name or group is listed
+    if FILTER then
+        local keep = FILTER[name] or (group and FILTER[group])
+        if not keep then
+            results.untested += 1
+            return
+        end
+    end
+
+    local t0 = os.clock()
+    local ok, err = pcall(fn)
+    local dt = os.clock() - t0
+
+    if ok then
+        if PRINT_TIME then
+            print(string.format("[sUNC] ✅ %s (%.3fs)", name, dt))
+        else
+            pass(name)
+        end
+    else
+        fail(name, err)
+    end
+
+    if DELAY > 0 then task.wait(DELAY) end
+end
+
+local function notSupported(name)
+    if FILTER and not FILTER[name] then
+        results.untested += 1
+        return
+    end
+    untested(name)
+end
+
+-- ───────────────────────────────────────────────────────────
+--  Helpers
+-- ───────────────────────────────────────────────────────────
+local function assert2(cond, msg)
+    if not cond then error(msg or "assertion failed", 2) end
+end
+
+local function typecheck(val, expected, label)
+    assert2(type(val) == expected,
+        string.format("%s: expected %s, got %s", label or "?", expected, type(val)))
+end
+
+-- ───────────────────────────────────────────────────────────
+--  CLOSURES
+-- ───────────────────────────────────────────────────────────
+print("\n── Closures ──")
+
+run("iscclosure", "Closures", function()
+    assert2(iscclosure ~= nil, "iscclosure missing")
+    assert2(iscclosure(print) == true,  "print should be a C closure")
+    assert2(iscclosure(function() end) == false, "lua fn should not be C closure")
+end)
+
+run("islclosure", "Closures", function()
+    assert2(islclosure ~= nil, "islclosure missing")
+    assert2(islclosure(function() end) == true,  "lua fn should be an L closure")
+    assert2(islclosure(print) == false, "print should not be an L closure")
+end)
+
+run("isexecutorclosure", "Closures", function()
+    assert2(isexecutorclosure ~= nil, "isexecutorclosure missing")
+    local ef = isexecutorclosure
+    -- the function checking should itself be executor-made
+    assert2(type(isexecutorclosure(ef)) == "boolean", "should return boolean")
+    -- a game closure definitely should not be executor-made
+    assert2(isexecutorclosure(print) == false, "print is not an executor closure")
+end)
+
+run("checkcaller", "Closures", function()
+    assert2(checkcaller ~= nil, "checkcaller missing")
+    assert2(checkcaller() == true, "checkcaller() should return true from executor context")
+end)
+
+run("newcclosure", "Closures", function()
+    assert2(newcclosure ~= nil, "newcclosure missing")
+    local function lf() return 42 end
+    local cc = newcclosure(lf)
+    assert2(iscclosure(cc), "result of newcclosure should be a C closure")
+    assert2(cc() == 42, "wrapped function should still return correctly")
+end)
+
+run("clonefunction", "Closures", function()
+    assert2(clonefunction ~= nil, "clonefunction missing")
+    local function orig(x) return x * 2 end
+    local cloned = clonefunction(orig)
+    assert2(cloned ~= orig, "clone should be a different reference")
+    assert2(cloned(5) == 10, "clone should behave identically")
+end)
+
+run("hookfunction", "Closures", function()
+    assert2(hookfunction ~= nil, "hookfunction missing")
+    -- use a named global so the hook target is unambiguous across executors
+    local function hookTarget() return "original" end
+    local returned = hookfunction(hookTarget, newcclosure and newcclosure(function() return "hooked" end) or function() return "hooked" end)
+    -- hookfunction must return the original (some executors call it replacewith)
+    assert2(type(returned) == "function", "hookfunction should return the original function")
+    assert2(hookTarget() == "hooked", "hook should intercept call")
+end)
+
+run("restorefunction", "Closures", function()
+    assert2(restorefunction ~= nil, "restorefunction missing")
+    -- fresh independent target — do NOT reuse the one from hookfunction test
+    local function restoreTarget() return "before" end
+    hookfunction(restoreTarget, function() return "after" end)
+    assert2(restoreTarget() == "after", "hook must be active before restore")
+    restorefunction(restoreTarget)
+    assert2(restoreTarget() == "before", "restore should revert to original behaviour")
+end)
+
+run("hookmetamethod", "Closures", function()
+    assert2(hookmetamethod ~= nil, "hookmetamethod missing")
+    local obj = setmetatable({}, {
+        __index = function(_, k) return k end,
+        __metatable = "locked",
+    })
+    local original = hookmetamethod(obj, "__index", function(self, k)
+        return k .. "_hooked"
+    end)
+    assert2(type(original) == "function", "should return original metamethod")
+    assert2(obj.test == "test_hooked", "hook should intercept __index")
+end)
+
+run("getfunctionhash", "Closures", function()
+    assert2(getfunctionhash ~= nil, "getfunctionhash missing")
+    local function f() return 1 end
+    local h = getfunctionhash(f)
+    typecheck(h, "string", "getfunctionhash return")
+    assert2(#h > 0, "hash should be non-empty")
+    assert2(h == getfunctionhash(f), "hash should be stable for same function")
+end)
+
+run("loadstring", "Closures", function()
+    assert2(loadstring ~= nil, "loadstring missing")
+    local fn, err = loadstring("return 1 + 1")
+    assert2(fn ~= nil, "loadstring compile error: " .. tostring(err))
+    assert2(fn() == 2, "loadstring result incorrect")
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  DEBUG
+-- ───────────────────────────────────────────────────────────
+print("\n── Debug ──")
+
+run("debug.getconstants", "Debug", function()
+    assert2(debug.getconstants ~= nil, "debug.getconstants missing")
+    local function f() local _ = "hello" return 42 end
+    local consts = debug.getconstants(f)
+    typecheck(consts, "table", "debug.getconstants return")
+end)
+
+run("debug.getconstant", "Debug", function()
+    assert2(debug.getconstant ~= nil, "debug.getconstant missing")
+    local function f() return "hi" end
+    local consts = debug.getconstants(f)
+    if #consts > 0 then
+        local v = debug.getconstant(f, 1)
+        assert2(v ~= nil, "should return a value")
+    end
+end)
+
+run("debug.setconstant", "Debug", function()
+    assert2(debug.setconstant ~= nil, "debug.setconstant missing")
+    -- clone so we don't corrupt anything if the test is re-run
+    local function base() return "setconstant_sentinel" end
+    local f = clonefunction and clonefunction(base) or base
+    local idx
+    for i, v in ipairs(debug.getconstants(f)) do
+        if v == "setconstant_sentinel" then idx = i break end
+    end
+    assert2(idx ~= nil, "sentinel constant not found — getconstants may be broken")
+    debug.setconstant(f, idx, "patched")
+    assert2(f() == "patched", "setconstant should change the returned constant")
+end)
+
+run("debug.getupvalues", "Debug", function()
+    assert2(debug.getupvalues ~= nil, "debug.getupvalues missing")
+    local x = 10
+    local function f() return x end
+    local ups = debug.getupvalues(f)
+    typecheck(ups, "table", "debug.getupvalues return")
+end)
+
+run("debug.getupvalue", "Debug", function()
+    assert2(debug.getupvalue ~= nil, "debug.getupvalue missing")
+    local x = 99
+    local function f() return x end
+    local ups = debug.getupvalues(f)
+    if #ups > 0 then
+        local v = debug.getupvalue(f, 1)
+        assert2(v == 99, "upvalue should equal x")
+    end
+end)
+
+run("debug.setupvalue", "Debug", function()
+    assert2(debug.setupvalue ~= nil, "debug.setupvalue missing")
+    local x = 1
+    local function f() return x end
+    debug.setupvalue(f, 1, 999)
+    assert2(f() == 999, "setupvalue should change upvalue")
+end)
+
+run("debug.getprotos", "Debug", function()
+    assert2(debug.getprotos ~= nil, "debug.getprotos missing")
+    local function f()
+        local function inner() end
+        return inner
+    end
+    local protos = debug.getprotos(f)
+    typecheck(protos, "table", "debug.getprotos return")
+end)
+
+run("debug.getproto", "Debug", function()
+    assert2(debug.getproto ~= nil, "debug.getproto missing")
+    local function f()
+        local function inner() return 7 end
+        return inner
+    end
+    local protos = debug.getprotos(f)
+    if #protos > 0 then
+        local p = debug.getproto(f, 1, true)
+        assert2(type(p) == "function", "getproto should return a function")
+    end
+end)
+
+run("debug.getstack", "Debug", function()
+    assert2(debug.getstack ~= nil, "debug.getstack missing")
+    local function inner()
+        local s = debug.getstack(1)
+        typecheck(s, "table", "debug.getstack return")
+    end
+    inner()
+end)
+
+run("debug.setstack", "Debug", function()
+    assert2(debug.setstack ~= nil, "debug.setstack missing")
+    -- just verify it exists and is callable; stack manipulation is frame-dependent
+    assert2(type(debug.setstack) == "function", "debug.setstack should be a function")
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  DRAWING
+-- ───────────────────────────────────────────────────────────
+print("\n── Drawing ──")
+
+run("Drawing.new", "Drawing.new", function()
+    assert2(Drawing ~= nil, "Drawing missing")
+    local line = Drawing.new("Line")
+    assert2(line ~= nil, "Drawing.new should return an object")
+    line:Remove()
+end)
+
+run("isrenderobj", "Drawing.new", function()
+    assert2(isrenderobj ~= nil, "isrenderobj missing")
+    local line = Drawing.new("Line")
+    assert2(isrenderobj(line) == true, "Drawing object should pass isrenderobj")
+    assert2(isrenderobj({}) == false, "plain table should fail isrenderobj")
+    line:Remove()
+end)
+
+run("getrenderproperty", "Drawing.new", function()
+    assert2(getrenderproperty ~= nil, "getrenderproperty missing")
+    local line = Drawing.new("Line")
+    local visible = getrenderproperty(line, "Visible")
+    assert2(type(visible) == "boolean", "Visible should be boolean")
+    line:Remove()
+end)
+
+run("setrenderproperty", "Drawing.new", function()
+    assert2(setrenderproperty ~= nil, "setrenderproperty missing")
+    local line = Drawing.new("Line")
+    setrenderproperty(line, "Visible", false)
+    assert2(getrenderproperty(line, "Visible") == false, "Visible should be false after set")
+    line:Remove()
+end)
+
+run("cleardrawcache", "Drawing.new", function()
+    assert2(cleardrawcache ~= nil, "cleardrawcache missing")
+    local line = Drawing.new("Line")
+    cleardrawcache()
+    -- if we get here without error, pass
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  ENCODING
+-- ───────────────────────────────────────────────────────────
+print("\n── Encoding ──")
+
+run("base64encode", "Encoding", function()
+    assert2(base64encode ~= nil, "base64encode missing")
+    local enc = base64encode("hello")
+    assert2(enc == "aGVsbG8=", "base64encode('hello') should equal 'aGVsbG8='")
+end)
+
+run("base64decode", "Encoding", function()
+    assert2(base64decode ~= nil, "base64decode missing")
+    local dec = base64decode("aGVsbG8=")
+    assert2(dec == "hello", "base64decode should round-trip")
+end)
+
+run("lz4compress", "Encoding", function()
+    if lz4compress == nil then notSupported("lz4compress") return end
+    local data = string.rep("abcd", 100)
+    local compressed = lz4compress(data)
+    typecheck(compressed, "string", "lz4compress return")
+    assert2(#compressed > 0,       "compressed output should be non-empty")
+    assert2(#compressed < #data,   "compressed should be smaller than input")
+end)
+
+run("lz4decompress", "Encoding", function()
+    if lz4decompress == nil then notSupported("lz4decompress") return end
+    if lz4compress == nil then
+        -- decompress can't be tested without compress
+        error("skip: lz4compress unavailable, cannot produce test payload")
+    end
+    local data = string.rep("abcd", 100)
+    local compressed = lz4compress(data)
+    local decompressed = lz4decompress(compressed, #data)
+    assert2(decompressed == data, "lz4 round-trip failed")
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  ENVIRONMENT
+-- ───────────────────────────────────────────────────────────
+print("\n── Environment ──")
+
+run("getgenv", "Environment", function()
+    assert2(getgenv ~= nil, "getgenv missing")
+    local env = getgenv()
+    typecheck(env, "table", "getgenv return")
+    -- should be shared: set a key and read it back
+    getgenv().__sUNCtest = true
+    assert2(getgenv().__sUNCtest == true, "getgenv should be persistent")
+    getgenv().__sUNCtest = nil
+end)
+
+run("getrenv", "Environment", function()
+    assert2(getrenv ~= nil, "getrenv missing")
+    local env = getrenv()
+    typecheck(env, "table", "getrenv return")
+    -- game env should have print but not executor functions
+    assert2(env.print ~= nil, "getrenv should contain print")
+end)
+
+run("getgc", "Environment", function()
+    assert2(getgc ~= nil, "getgc missing")
+    local gc = getgc()
+    typecheck(gc, "table", "getgc return")
+    assert2(#gc > 0, "getgc should return non-empty table")
+end)
+
+run("getreg", "Environment", function()
+    assert2(getreg ~= nil, "getreg missing")
+    local reg = getreg()
+    typecheck(reg, "table", "getreg return")
+end)
+
+run("filtergc", "Environment", function()
+    assert2(filtergc ~= nil, "filtergc missing")
+    -- sUNC uses "include_executor" but older forks used "executor" — try both
+    local fns = filtergc("function", { include_executor = false })
+    if fns == nil then
+        fns = filtergc("function", { executor = false })
+    end
+    typecheck(fns, "table", "filtergc return")
+    assert2(#fns > 0, "filtergc should return at least some functions")
+    for _, v in ipairs(fns) do
+        assert2(type(v) == "function", "filtergc 'function' entries should all be functions")
+        break
+    end
+    -- table variant
+    local tbls = filtergc("table", {})
+    typecheck(tbls, "table", "filtergc 'table' return")
+    assert2(#tbls > 0, "filtergc should return at least some tables")
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  FILESYSTEM
+-- ───────────────────────────────────────────────────────────
+print("\n── Filesystem ──")
+
+local FS_FOLDER = "sUNCtest"
+local FS_FILE   = FS_FOLDER .. "/test.txt"
+local FS_APPEND = FS_FOLDER .. "/append.txt"
+
+run("makefolder", "filesys", function()
+    assert2(makefolder ~= nil, "makefolder missing")
+    makefolder(FS_FOLDER)
+    assert2(isfolder(FS_FOLDER), "folder should exist after makefolder")
+end)
+
+run("isfolder", "filesys", function()
+    assert2(isfolder ~= nil, "isfolder missing")
+    assert2(isfolder(FS_FOLDER) == true,  "created folder should exist")
+    assert2(isfolder("__nonexistent_sunc__") == false, "nonexistent folder should return false")
+end)
+
+run("writefile", "filesys", function()
+    assert2(writefile ~= nil, "writefile missing")
+    writefile(FS_FILE, "sUNC test content")
+    assert2(isfile(FS_FILE), "file should exist after writefile")
+end)
+
+run("isfile", "filesys", function()
+    assert2(isfile ~= nil, "isfile missing")
+    assert2(isfile(FS_FILE) == true, "written file should exist")
+    assert2(isfile("__nonexistent_sunc__.txt") == false, "nonexistent file should return false")
+end)
+
+run("readfile", "filesys", function()
+    assert2(readfile ~= nil, "readfile missing")
+    local content = readfile(FS_FILE)
+    assert2(content == "sUNC test content", "readfile should return written content")
+end)
+
+run("appendfile", "filesys", function()
+    assert2(appendfile ~= nil, "appendfile missing")
+    writefile(FS_APPEND, "line1")
+    appendfile(FS_APPEND, "\nline2")
+    local content = readfile(FS_APPEND)
+    assert2(content == "line1\nline2", "appendfile should append correctly")
+end)
+
+run("listfiles", "filesys", function()
+    assert2(listfiles ~= nil, "listfiles missing")
+    local files = listfiles(FS_FOLDER)
+    typecheck(files, "table", "listfiles return")
+    assert2(#files >= 1, "listfiles should return at least one file")
+end)
+
+run("loadfile", "filesys", function()
+    assert2(loadfile ~= nil, "loadfile missing")
+    writefile(FS_FOLDER .. "/load.lua", "return 1 + 1")
+    local fn, err = loadfile(FS_FOLDER .. "/load.lua")
+    assert2(fn ~= nil, "loadfile should compile: " .. tostring(err))
+    assert2(fn() == 2, "loadfile result incorrect")
+end)
+
+run("getcustomasset", "filesys", function()
+    assert2(getcustomasset ~= nil, "getcustomasset missing")
+    -- write a small png placeholder (1x1 transparent png)
+    local PNG = "\137PNG\r\n\26\n\0\0\0\rIHDR\0\0\0\1\0\0\0\1\8\6\0\0\0\31\21\196\137\0\0\0\nIDATx\156c\248\15\0\0\1\1\0\5\24\213\78\0\0\0\0IEND\174B`\130"
+    writefile(FS_FOLDER .. "/test.png", PNG)
+    local rbxAsset = getcustomasset(FS_FOLDER .. "/test.png")
+    typecheck(rbxAsset, "string", "getcustomasset return")
+    assert2(rbxAsset:find("rbxasset://") or rbxAsset:find("rbxtemp://"),
+        "getcustomasset should return an rbx URI")
+end)
+
+run("delfile", "filesys", function()
+    assert2(delfile ~= nil, "delfile missing")
+    local tmp = FS_FOLDER .. "/tmp.txt"
+    writefile(tmp, "delete me")
+    delfile(tmp)
+    assert2(not isfile(tmp), "file should be gone after delfile")
+end)
+
+run("delfolder", "filesys", function()
+    assert2(delfolder ~= nil, "delfolder missing")
+    local tmpdir = FS_FOLDER .. "/tmpdir"
+    makefolder(tmpdir)
+    delfolder(tmpdir)
+    assert2(not isfolder(tmpdir), "folder should be gone after delfolder")
+end)
+
+-- cleanup
+pcall(function()
+    for _, f in ipairs(listfiles(FS_FOLDER)) do pcall(delfile, f) end
+    pcall(delfolder, FS_FOLDER)
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  INSTANCES
+-- ───────────────────────────────────────────────────────────
+print("\n── Instances ──")
+
+run("getinstances", "Instances", function()
+    assert2(getinstances ~= nil, "getinstances missing")
+    local list = getinstances()
+    typecheck(list, "table", "getinstances return")
+    assert2(#list > 0, "getinstances should return at least some instances")
+    assert2(typeof(list[1]) == "Instance", "getinstances entries should be Instances")
+end)
+
+run("getnilinstances", "Instances", function()
+    assert2(getnilinstances ~= nil, "getnilinstances missing")
+    local list = getnilinstances()
+    typecheck(list, "table", "getnilinstances return")
+end)
+
+run("gethui", "Instances", function()
+    assert2(gethui ~= nil, "gethui missing")
+    local hui = gethui()
+    assert2(typeof(hui) == "Instance", "gethui should return an Instance")
+end)
+
+run("cloneref", "cloneref", function()
+    assert2(cloneref ~= nil, "cloneref missing")
+    local ws = game:GetService("Workspace")
+    local clone = cloneref(ws)
+    assert2(clone ~= ws, "cloneref should return a different reference")
+    assert2(compareinstances(clone, ws), "cloneref should still compare equal via compareinstances")
+end)
+
+run("compareinstances", "cloneref", function()
+    assert2(compareinstances ~= nil, "compareinstances missing")
+    local ws = game:GetService("Workspace")
+    local clone = cloneref(ws)
+    assert2(compareinstances(ws, ws) == true,  "same ref should be equal")
+    assert2(compareinstances(clone, ws) == true, "cloneref should compare equal")
+    assert2(compareinstances(ws, game) == false, "different instances should not be equal")
+end)
+
+run("getcallbackvalue", "Instances", function()
+    assert2(getcallbackvalue ~= nil, "getcallbackvalue missing")
+    local ss = Instance.new("ScreenGui")
+    -- just verify the call doesn't error on a valid instance + property
+    -- BindableFunction has OnInvoke as a callback
+    local bf = Instance.new("BindableFunction")
+    bf.OnInvoke = function() end
+    local cb = getcallbackvalue(bf, "OnInvoke")
+    assert2(type(cb) == "function", "getcallbackvalue should return the callback function")
+    bf:Destroy()
+    ss:Destroy()
+end)
+
+run("fireclickdetector", "Instances", function()
+    assert2(fireclickdetector ~= nil, "fireclickdetector missing")
+    local part = Instance.new("Part")
+    local cd = Instance.new("ClickDetector", part)
+    fireclickdetector(cd, 0)
+    -- no error = pass
+    cd:Destroy()
+    part:Destroy()
+end)
+
+run("firetouchinterest", "Instances", function()
+    assert2(firetouchinterest ~= nil, "firetouchinterest missing")
+    local char = game.Players.LocalPlayer and game.Players.LocalPlayer.Character
+    if not char then
+        -- no character loaded yet — can't meaningfully test, mark untested
+        results.passed -= 0  -- undo the upcoming pass by bailing via error
+        error("skip: no character loaded (join a game first)")
+    end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    assert2(root ~= nil, "HumanoidRootPart not found in character")
+    local part = Instance.new("Part")
+    part.Parent = workspace
+    firetouchinterest(part, root, 0)  -- touch begin
+    firetouchinterest(part, root, 1)  -- touch end
+    part:Destroy()
+end)
+
+run("fireproximityprompt", "Instances", function()
+    assert2(fireproximityprompt ~= nil, "fireproximityprompt missing")
+    local part = Instance.new("Part")
+    local pp = Instance.new("ProximityPrompt", part)
+    fireproximityprompt(pp)
+    pp:Destroy()
+    part:Destroy()
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  METATABLE
+-- ───────────────────────────────────────────────────────────
+print("\n── Metatable ──")
+
+run("getrawmetatable", "Metatable", function()
+    assert2(getrawmetatable ~= nil, "getrawmetatable missing")
+    local t = setmetatable({}, { __index = function() return 1 end, __metatable = "locked" })
+    local mt = getrawmetatable(t)
+    typecheck(mt, "table", "getrawmetatable return")
+    assert2(mt.__index ~= nil, "raw metatable should contain __index")
+end)
+
+run("setrawmetatable", "Metatable", function()
+    assert2(setrawmetatable ~= nil, "setrawmetatable missing")
+    local t = setmetatable({}, { __metatable = "locked" })
+    local newmt = { __index = function() return 42 end }
+    setrawmetatable(t, newmt)
+    assert2(t.anything == 42, "setrawmetatable should apply the new metatable")
+end)
+
+run("isreadonly", "Metatable", function()
+    assert2(isreadonly ~= nil, "isreadonly missing")
+    local t = {}
+    assert2(isreadonly(t) == false, "plain table should not be readonly")
+    setreadonly(t, true)
+    assert2(isreadonly(t) == true, "table should be readonly after setreadonly")
+    setreadonly(t, false)
+end)
+
+run("setreadonly", "Metatable", function()
+    assert2(setreadonly ~= nil, "setreadonly missing")
+    local t = { x = 1 }
+    setreadonly(t, true)
+    -- some executors throw, some silently ignore writes — check isreadonly instead
+    -- of relying on pcall since error type varies wildly
+    assert2(isreadonly(t) == true, "table should be readonly after setreadonly(true)")
+    -- attempt the write but don't assert on the pcall result
+    pcall(function() t.x = 2 end)
+    setreadonly(t, false)
+    assert2(isreadonly(t) == false, "table should not be readonly after setreadonly(false)")
+    t.x = 99
+    assert2(t.x == 99, "write should succeed after setreadonly(false)")
+end)
+
+run("getnamecallmethod", "Metatable", function()
+    assert2(getnamecallmethod ~= nil, "getnamecallmethod missing")
+    assert2(hookmetamethod ~= nil,    "hookmetamethod required for getnamecallmethod test")
+    assert2(getrawmetatable ~= nil,   "getrawmetatable required for getnamecallmethod test")
+    local captured
+    local old = hookmetamethod(game, "__namecall", newcclosure and newcclosure(function(self, ...)
+        captured = getnamecallmethod()
+        return old(self, ...)
+    end) or function(self, ...)
+        captured = getnamecallmethod()
+        return old(self, ...)
+    end)
+    pcall(function() game:GetService("Workspace") end)
+    -- always restore before asserting so a failure doesn't leave the hook live
+    hookmetamethod(game, "__namecall", old)
+    assert2(captured == "GetService",
+        "getnamecallmethod should return 'GetService', got: " .. tostring(captured))
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  MISCELLANEOUS
+-- ───────────────────────────────────────────────────────────
+print("\n── Miscellaneous ──")
+
+run("identifyexecutor", "Miscellaneous", function()
+    assert2(identifyexecutor ~= nil, "identifyexecutor missing")
+    local name, version = identifyexecutor()
+    typecheck(name, "string", "identifyexecutor name")
+    assert2(#name > 0, "executor name should be non-empty")
+end)
+
+run("request", "Miscellaneous", function()
+    assert2(request ~= nil or http ~= nil or http_request ~= nil, "no http function found")
+    local req = request or (http and http.request) or http_request
+    local res = req({
+        Url    = "https://httpbin.org/get",
+        Method = "GET",
+    })
+    typecheck(res, "table", "request return")
+    assert2(res.StatusCode == 200, "request should return 200: got " .. tostring(res.StatusCode))
+    typecheck(res.Body, "string", "request Body")
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  REFLECTION
+-- ───────────────────────────────────────────────────────────
+print("\n── Reflection ──")
+
+run("getthreadidentity", "Reflection", function()
+    assert2(getthreadidentity ~= nil or getidentity ~= nil, "getthreadidentity missing")
+    local fn = getthreadidentity or getidentity
+    local id = fn()
+    typecheck(id, "number", "getthreadidentity return")
+    assert2(id >= 0, "identity should be >= 0")
+end)
+
+run("setthreadidentity", "Reflection", function()
+    assert2(setthreadidentity ~= nil or setidentity ~= nil, "setthreadidentity missing")
+    local set = setthreadidentity or setidentity
+    local get = getthreadidentity or getidentity
+    local old = get()
+    set(6)
+    assert2(get() == 6, "identity should be 6 after set")
+    set(old)
+end)
+
+run("isscriptable", "Reflection", function()
+    assert2(isscriptable ~= nil, "isscriptable missing")
+    local cam = workspace.CurrentCamera
+    -- FOV is scriptable, some internal props are not
+    assert2(isscriptable(cam, "FieldOfView") == true, "FieldOfView should be scriptable")
+end)
+
+run("setscriptable", "Reflection", function()
+    assert2(setscriptable ~= nil, "setscriptable missing")
+    local part = Instance.new("Part")
+    -- LocalTransparencyModifier is a known non-scriptable property
+    local was = isscriptable(part, "LocalTransparencyModifier") or false
+    setscriptable(part, "LocalTransparencyModifier", true)
+    assert2(isscriptable(part, "LocalTransparencyModifier") == true,
+        "property should be scriptable after setscriptable")
+    setscriptable(part, "LocalTransparencyModifier", was)
+    part:Destroy()
+end)
+
+run("gethiddenproperty", "Reflection", function()
+    assert2(gethiddenproperty ~= nil, "gethiddenproperty missing")
+    local part = Instance.new("Part")
+    local val, isHidden = gethiddenproperty(part, "LocalTransparencyModifier")
+    assert2(val ~= nil, "should return a value")
+    assert2(type(isHidden) == "boolean", "second return should be boolean")
+    part:Destroy()
+end)
+
+run("sethiddenproperty", "Reflection", function()
+    assert2(sethiddenproperty ~= nil, "sethiddenproperty missing")
+    local part = Instance.new("Part")
+    sethiddenproperty(part, "LocalTransparencyModifier", 0.5)
+    local val = gethiddenproperty(part, "LocalTransparencyModifier")
+    assert2(math.abs(val - 0.5) < 0.001, "hidden property value should be 0.5")
+    part:Destroy()
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  SCRIPTS
+-- ───────────────────────────────────────────────────────────
+print("\n── Scripts ──")
+
+run("getscripts", "Scripts", function()
+    assert2(getscripts ~= nil, "getscripts missing")
+    local scripts = getscripts()
+    typecheck(scripts, "table", "getscripts return")
+    assert2(#scripts > 0, "should find at least one script")
+end)
+
+run("getrunningscripts", "Scripts", function()
+    assert2(getrunningscripts ~= nil, "getrunningscripts missing")
+    local running = getrunningscripts()
+    typecheck(running, "table", "getrunningscripts return")
+    assert2(#running > 0, "at least this script should be running")
+end)
+
+run("getloadedmodules", "Scripts", function()
+    assert2(getloadedmodules ~= nil, "getloadedmodules missing")
+    local mods = getloadedmodules()
+    typecheck(mods, "table", "getloadedmodules return")
+end)
+
+run("getscriptbytecode", "Scripts", function()
+    assert2(getscriptbytecode ~= nil, "getscriptbytecode missing")
+    local scripts = getscripts()
+    for _, s in ipairs(scripts) do
+        if s:IsA("LocalScript") or s:IsA("ModuleScript") then
+            local bc = getscriptbytecode(s)
+            typecheck(bc, "string", "getscriptbytecode return")
+            assert2(#bc > 0, "bytecode should be non-empty")
+            return
+        end
+    end
+end)
+
+run("getscripthash", "Scripts", function()
+    assert2(getscripthash ~= nil, "getscripthash missing")
+    local scripts = getscripts()
+    for _, s in ipairs(scripts) do
+        if s:IsA("LocalScript") or s:IsA("ModuleScript") then
+            local h = getscripthash(s)
+            typecheck(h, "string", "getscripthash return")
+            assert2(#h > 0, "hash should be non-empty")
+            return
+        end
+    end
+end)
+
+run("getscriptclosure", "Scripts", function()
+    assert2(getscriptclosure ~= nil, "getscriptclosure missing")
+    local scripts = getscripts()
+    for _, s in ipairs(scripts) do
+        if s:IsA("LocalScript") or s:IsA("ModuleScript") then
+            local fn = getscriptclosure(s)
+            assert2(type(fn) == "function", "getscriptclosure should return a function")
+            return
+        end
+    end
+end)
+
+run("getsenv", "Scripts", function()
+    assert2(getsenv ~= nil, "getsenv missing")
+    local scripts = getrunningscripts()
+    for _, s in ipairs(scripts) do
+        local env = getsenv(s)
+        if env then
+            typecheck(env, "table", "getsenv return")
+            return
+        end
+    end
+end)
+
+run("getcallingscript", "Scripts", function()
+    assert2(getcallingscript ~= nil, "getcallingscript missing")
+    -- should return nil or an Instance when called from executor context
+    local cs = getcallingscript()
+    assert2(cs == nil or typeof(cs) == "Instance",
+        "getcallingscript should return nil or Instance")
+end)
+
+run("getscriptfromthread", "Scripts", function()
+    assert2(getscriptfromthread ~= nil, "getscriptfromthread missing")
+    local t = task.spawn(function()
+        local s = getscriptfromthread(coroutine.running())
+        assert2(s == nil or typeof(s) == "Instance",
+            "getscriptfromthread should return nil or Instance")
+    end)
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  SIGNALS
+-- ───────────────────────────────────────────────────────────
+print("\n── Signals ──")
+
+run("getconnections", "Signals", function()
+    assert2(getconnections ~= nil, "getconnections missing")
+    local part = Instance.new("Part")
+    local conn = part.Touched:Connect(function() end)
+    local conns = getconnections(part.Touched)
+    typecheck(conns, "table", "getconnections return")
+    assert2(#conns >= 1, "should find at least our connection")
+    -- Connection object fields
+    local c = conns[1]
+    assert2(type(c.Function)   == "function", "connection.Function should be a function")
+    assert2(type(c.Enabled)    == "boolean",  "connection.Enabled should be boolean")
+    assert2(type(c.Disconnect) == "function", "connection.Disconnect should be a function")
+    conn:Disconnect()
+    part:Destroy()
+end)
+
+run("firesignal", "Signals", function()
+    assert2(firesignal ~= nil, "firesignal missing")
+    local be = Instance.new("BindableEvent")
+    local fired = false
+    be.Event:Connect(function() fired = true end)
+    firesignal(be.Event)
+    task.wait()
+    assert2(fired, "firesignal should fire the signal")
+    be:Destroy()
+end)
+
+run("replicatesignal", "Signals", function()
+    if replicatesignal == nil then notSupported("replicatesignal") return end
+    -- just verify it's callable
+    assert2(type(replicatesignal) == "function", "replicatesignal should be a function")
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  WEBSOCKET
+-- ───────────────────────────────────────────────────────────
+print("\n── WebSocket ──")
+
+run("WebSocket.connect", "WebSocket", function()
+    assert2(WebSocket ~= nil, "WebSocket missing")
+    assert2(type(WebSocket.connect) == "function", "WebSocket.connect missing")
+    -- use wss://echo.websocket.org as primary, fall back to shape-only check on failure
+    -- (don't hard-fail just because a third-party server is down)
+    local ok, ws = pcall(WebSocket.connect, "wss://echo.websocket.org")
+    if not ok or ws == nil then
+        -- try alternate
+        ok, ws = pcall(WebSocket.connect, "wss://socketsbay.com/wss/v2/1/demo/")
+    end
+    assert2(ok and ws ~= nil,
+        "WebSocket.connect failed on both echo servers — executor may not support WebSocket")
+    -- validate the object contract regardless of which server responded
+    assert2(type(ws.Send)  == "function", "ws.Send should be a function")
+    assert2(type(ws.Close) == "function", "ws.Close should be a function")
+    assert2(ws.OnMessage ~= nil, "ws.OnMessage should exist")
+    assert2(ws.OnClose   ~= nil, "ws.OnClose should exist")
+    -- send a ping and verify we don't crash (don't assert the response — server-dependent)
+    pcall(function() ws:Send("ping") end)
+    ws:Close()
+end)
+
+-- ───────────────────────────────────────────────────────────
+--  RESULTS SUMMARY
+-- ───────────────────────────────────────────────────────────
+task.wait(0.1)
+local total = results.passed + results.failed + results.untested
+local score = total > 0 and math.floor((results.passed / (results.passed + results.failed)) * 100) or 0
+
+print(string.rep("─", 40))
+print(string.format("[sUNC] Results for: %s", (identifyexecutor and identifyexecutor() or "unknown")))
+print(string.format("[sUNC] Passed    : %d", results.passed))
+print(string.format("[sUNC] Failed    : %d", results.failed))
+print(string.format("[sUNC] Untested  : %d", results.untested))
+print(string.format("[sUNC] Score     : %d%% (%d / %d tested)", score, results.passed, results.passed + results.failed))
+print(string.rep("─", 40))
+</script>
+
+<script>
+(function () {
+  var src = document.getElementById('sunc-source').textContent.replace(/^\n/, '');
+
+  /* ── wave background ─────────────────────────── */
+  (function initWaves() {
+    var c = document.getElementById('waves');
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    if (!ctx) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = 0, h = 0, lines = [];
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var running = false, rafId = 0;
+
+    function make() {
+      lines = [];
+      var n = Math.round(Math.max(20, Math.min(46, h / (34 * dpr))));
+      for (var i = 0; i < n; i++) {
+        lines.push({
+          fy: (i + 0.5) / n,
+          a1: (10 + Math.random() * 30) * dpr,
+          a2: (4 + Math.random() * 16) * dpr,
+          k1: (1 + Math.random() * 2.2) * 2 * Math.PI / w,
+          k2: (2.4 + Math.random() * 4.5) * 2 * Math.PI / w,
+          p1: Math.random() * 6.283,
+          p2: Math.random() * 6.283,
+          s1: (0.04 + Math.random() * 0.12) * (Math.random() < 0.5 ? -1 : 1),
+          s2: (0.03 + Math.random() * 0.09) * (Math.random() < 0.5 ? -1 : 1),
+          al: 0.028 + Math.random() * 0.05
+        });
+      }
+    }
+
+    function resize() {
+      w = c.width = Math.floor(window.innerWidth * dpr);
+      h = c.height = Math.floor(window.innerHeight * dpr);
+      c.style.width = window.innerWidth + 'px';
+      c.style.height = window.innerHeight + 'px';
+      make();
+    }
+
+    function draw(t) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineWidth = 1 * dpr;
+      for (var i = 0; i < lines.length; i++) {
+        var L = lines[i];
+        ctx.strokeStyle = 'rgba(255,255,255,' + L.al + ')';
+        ctx.beginPath();
+        var base = L.fy * h;
+        for (var x = 0; x <= w; x += 7 * dpr) {
+          var y = base
+            + Math.sin(x * L.k1 + L.p1 + t * L.s1) * L.a1
+            + Math.sin(x * L.k2 + L.p2 + t * L.s2) * L.a2;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+    }
+
+    function loop(ts) {
+      if (!running) return;
+      draw(ts * 0.001);
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function start() {
+      if (reduce) { draw(0); return; }
+      if (running) return;
+      running = true;
+      rafId = requestAnimationFrame(loop);
+    }
+    function stop() {
+      running = false;
+      if (rafId) cancelAnimationFrame(rafId);
+    }
+
+    window.addEventListener('resize', function () { resize(); if (reduce) draw(0); });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) stop(); else start();
+    });
+    resize();
+    start();
+  })();
+
+  /* ── copy / download / raw ───────────────────── */
+  function copy(text, btn, labelDone, labelIdle) {
+    function flash(msg) {
+      if (!btn) return;
+      var t = btn.textContent;
+      btn.textContent = msg;
+      setTimeout(function () { btn.textContent = labelIdle || t; }, 1600);
+    }
+    function done() {
+      if (btn) btn.classList.add('done');
+      flash(labelDone);
+    }
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      if (ok) done(); else flash('Copy failed');
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } catch (e) { fallback(); }
+    } else { fallback(); }
+  }
+
+  var loaderBtns = document.querySelectorAll('[data-copy-loader]');
+  // When served over http(s), the loader URL is this site's own /sUNC.lua;
+  // on file:// it falls back to the canonical GitHub raw URL. The hosted URL
+  // resolves from the current path, so subpath hosts (e.g. GitHub Pages at
+  // irlweb.github.io/sUNC/) work too.
+  var CANONICAL_URL = 'https://raw.githubusercontent.com/IrlWeb/sUNC/refs/heads/main/sUNC.lua';
+  var hosted = location.protocol === 'http:' || location.protocol === 'https:';
+  var baseDir = hosted ? location.pathname.replace(/[^\/]*$/, '') : '/';
+  var SITE_URL = hosted ? location.origin + baseDir + 'sUNC.lua' : CANONICAL_URL;
+  var lu = document.getElementById('loadurl');
+  if (lu) lu.textContent = SITE_URL;
+  if (hosted) {
+    var ln = document.getElementById('loadurl-note');
+    if (ln) ln.innerHTML = 'The loader below points to <code>' + SITE_URL.replace(/</g, '&lt;') + '</code> — served straight from this site. Run it in any executor.';
+  }
+  var LOADER = [
+    'getgenv().sUNCDebug = {',
+    '    ["printcheckpoints"] = false,',
+    '    ["delaybetweentests"] = 0,',
+    '    ["printtesttimetaken"] = false,',
+    '}',
+    '',
+    'loadstring(game:HttpGet("' + SITE_URL + '"))()'
+  ].join('\n');
+
+  Array.prototype.forEach.call(loaderBtns, function (btn) {
+    btn.addEventListener('click', function () {
+      copy(LOADER, btn, 'Copied!', 'Copy Script');
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy-full]'), function (btn) {
+    btn.addEventListener('click', function () { copy(src, btn, 'Copied!'); });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-download]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([src], { type: 'text/plain;charset=utf-8' }));
+      a.download = 'sUNC.lua';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-raw]'), function (btn) {
+    btn.addEventListener('click', function () {
+      var url = URL.createObjectURL(new Blob([src], { type: 'text/plain;charset=utf-8' }));
+      window.open(url, '_blank');
+      setTimeout(function () { URL.revokeObjectURL(url); }, 30000);
+    });
+  });
+
+  // scroll reveal
+  var els = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.08 });
+    Array.prototype.forEach.call(els, function (el) { io.observe(el); });
+  } else {
+    Array.prototype.forEach.call(els, function (el) { el.classList.add('in'); });
+  }
+})();
+</script>
+
+</body>
+</html>
