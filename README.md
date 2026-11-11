@@ -1,62 +1,75 @@
-# sUNC
+# ✨ sUNC
 
-### Unified Naming Convention for Roblox Environments
+<p align="center">
+  **🌐 Unified Naming Convention for Roblox Environments**
+  <br/>
+  A consistent approach to environment compatibility and functionality.
+</p>
 
-sUNC is a Lua-based project focused on evaluating and documenting environment compatibility through a unified naming convention.
+<p align="center">
+  ![Lua](https://img.shields.io/badge/Language-Lua-7C3AED?style=for-the-badge&logo=lua&logoColor=white)
+  ![GitHub](https://img.shields.io/badge/Platform-GitHub-181717?style=for-the-badge&logo=github)
+  ![Status](https://img.shields.io/badge/Status-Open_Source-22C55E?style=for-the-badge)
+</p>
 
 ---
 
-## Overview
+## 📖・Overview
 
-The goal of sUNC is to provide a consistent way to describe and assess supported environment functionality.
+**sUNC** is a project focused on evaluating and documenting environment compatibility through a unified naming convention.
 
-This repository contains the project's Lua source and its accompanying web interface.
+The project aims to make compatibility reporting more consistent, organized, and accessible to developers.
 
-## Repository Structure
+## 🚀・Features
+
+- 🔍 **Compatibility Testing** — Evaluate supported environment functionality.
+- 📊 **Clear Reporting** — Present compatibility results in an organized format.
+- 🧩 **Unified Naming** — Maintain consistent function naming conventions.
+- ⚡ **Developer Friendly** — Keep the project accessible and easy to understand.
+- 🛠️ **Open Source** — Community contributions and improvements are welcome.
+
+## 📁・Repository Structure
 
 | File | Description |
 |---|---|
-| `sUNC.lua` | Main Lua source |
-| `index.html` | Web interface |
+| 📜 `sUNC.lua` | Main Lua source |
+| 🌐 `index.html` | Web interface |
 
-## Project Goals
+## 🌍・Website
 
-- Consistent naming conventions
-- Clear compatibility reporting
-- Organized project structure
-- Developer-friendly documentation
-- Transparent and maintainable code
+Explore the project online:
 
-## Website
+<p align="center">
+  <a href="https://irlweb.github.io/sUNC/">
+    <img src="https://img.shields.io/badge/Visit_Website-7C3AED?style=for-the-badge&logo=googlechrome&logoColor=white" />
+  </a>
+</p>
 
-Visit the project website:
+## 🤝・Contributing
 
-[irlweb.github.io/sUNC](https://irlweb.github.io/sUNC/)
+Contributions and suggestions are welcome!
 
-## Contributing
+1. 🍴 Fork this repository.
+2. 🌱 Create a new branch.
+3. 💻 Make your changes.
+4. 📬 Submit a pull request.
 
-Contributions, suggestions, and improvements are welcome.
+Please keep contributions clean, organized, and consistent with the existing project.
 
-If you would like to contribute:
-
-1. Fork the repository.
-2. Create a new branch.
-3. Make your changes.
-4. Submit a pull request with a clear description.
-
-Please keep contributions organized and consistent with the existing project structure.
-
-## Disclaimer
+## ⚠️・Disclaimer
 
 This project is provided for educational and research purposes. Compatibility results depend on the environment being evaluated and should not be considered a guarantee of functionality.
 
-## License
+## 📄・License
 
 See the repository for applicable licensing information.
 
 ---
 
 <p align="center">
-  **sUNC**  
-  <sub>Unified. Consistent. Documented.</sub>
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=7C3AED&height=2&section=footer" width="100%" />
+  <br/>
+  **✨ sUNC — Unified. Consistent. Documented.**
+  <br/>
+  <sub>Made for developers, by developers.</sub>
 </p>
