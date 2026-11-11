@@ -1,4 +1,4 @@
-# ✨ sUNC
+#  sUNC
 
 ### 🌐 Unified Naming Convention for Roblox Environments
 
