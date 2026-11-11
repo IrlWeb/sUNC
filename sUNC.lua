@@ -27,6 +27,7 @@ local DELAY          = cfg.delaybetweentests   or 0
 local CHECKPOINTS    = cfg.printcheckpoints    or false
 local PRINT_TIME     = cfg.printtesttimetaken  or false
 local FILTER         = cfg.functionstotest     -- nil = run all
+local RUN_T0         = os.clock()
 
 print([[ 
 
@@ -45,13 +46,27 @@ local results = {
     untested = 0,
 }
 
-local function pass(name)
+-- per-category tracking for the report card
+local catStats, catOrder, currentCat = {}, {}, nil
+
+local function bump(kind)
+    local c = currentCat and catStats[currentCat]
+    if c then c[kind] += 1 end
+end
+
+local function pass(name, dt)
     results.passed += 1
-    print(string.format("[sUNC] ✅ %s", name))
+    bump("passed")
+    if dt then
+        print(string.format("[sUNC] ✅ %s (%.3fs)", name, dt))
+    else
+        print(string.format("[sUNC] ✅ %s", name))
+    end
 end
 
 local function fail(name, reason)
     results.failed += 1
+    bump("failed")
     warn(string.format("[sUNC] ❌ %s", name))
     if reason then
         warn(string.format("[sUNC]    └─ %s", tostring(reason)))
@@ -60,6 +75,7 @@ end
 
 local function untested(name)
     results.untested += 1
+    bump("untested")
     print(string.format("[sUNC] ⬜ %s — not supported", name))
 end
 
@@ -68,6 +84,11 @@ local function checkpoint(msg)
 end
 
 local function banner(title)
+    currentCat = title
+    if not catStats[title] then
+        catStats[title] = { passed = 0, failed = 0, untested = 0 }
+        catOrder[#catOrder + 1] = title
+    end
     print("\n── " .. title .. " " .. string.rep("─", math.max(1, 44 - #title)))
 end
 
@@ -80,6 +101,7 @@ local function run(name, group, fn)
         local keep = FILTER[name] or (group and FILTER[group])
         if not keep then
             results.untested += 1
+            bump("untested")
             return
         end
     end
@@ -89,11 +111,7 @@ local function run(name, group, fn)
     local dt = os.clock() - t0
 
     if ok then
-        if PRINT_TIME then
-            print(string.format("[sUNC] ✅ %s (%.3fs)", name, dt))
-        else
-            pass(name)
-        end
+        pass(name, PRINT_TIME and dt or nil)
     else
         fail(name, err)
     end
@@ -104,6 +122,7 @@ end
 local function notSupported(name)
     if FILTER and not FILTER[name] then
         results.untested += 1
+        bump("untested")
         return
     end
     untested(name)
@@ -968,8 +987,39 @@ print(string.format("  %-9s: %d", "Passed",   results.passed))
 print(string.format("  %-9s: %d", "Failed",   results.failed))
 print(string.format("  %-9s: %d", "Untested", results.untested))
 print(string.format("  %-9s: %d", "Total",    total))
+print(string.format("  %-9s: %.2fs", "Elapsed", os.clock() - RUN_T0))
 print("  " .. string.rep("─", W - 4))
 print(string.format("  %-9s: %s %3d%%", "Score",
     bar(BARW, math.floor(score / 100 * BARW + 0.5)), score))
 print(string.format("             %d / %d tests passed", results.passed, tested))
+
+local prev = tonumber(getgenv().sUNCLastScore)
+if prev then
+    local d = score - prev
+    if d > 0 then
+        print(string.format("             ▲ +%d%% vs last run (%d%%)", d, prev))
+    elseif d < 0 then
+        print(string.format("             ▼ %d%% vs last run (%d%%)", d, prev))
+    else
+        print(string.format("             ● same as last run (%d%%)", prev))
+    end
+end
+getgenv().sUNCLastScore = score
+
+local verdict = score >= 95 and "✅ excellent — near-full sUNC support"
+    or score >= 80 and "🟡 good — most features supported"
+    or score >= 50 and "🟠 partial — significant gaps"
+    or "🔴 poor — limited support"
+print("             " .. verdict)
 print(string.rep("═", W))
+
+print("\n  ── by category " .. string.rep("─", 30))
+for _, k in ipairs(catOrder) do
+    local c = catStats[k]
+    local t = c.passed + c.failed
+    if t > 0 then
+        local pct   = math.floor(c.passed / t * BARW + 0.5)
+        local extra = c.untested > 0 and string.format(" (+%d n/a)", c.untested) or ""
+        print(string.format("  %-13s %s %d/%d%s", k, bar(BARW, pct), c.passed, t, extra))
+    end
+end
