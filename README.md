@@ -64,4 +64,4 @@ See the repository for applicable licensing information.
 
 **Unified. Consistent. Documented.**
 
-<sub>Made for developers, by developers.</sub>
+<sub>Made for developers, irl web/me.</sub>
