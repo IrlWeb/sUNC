@@ -1,4 +1,4 @@
-#  sUNC
+#  sUNC Test Script made by a not lazy person.... (those who caught the refrence 👀...)
 ![Description](https://github.com/IrlWeb/sUNC/blob/main/Screenshot%202026-11-11%20011630.png)   
 ### 🌐 Unified Naming Convention for Roblox Environments
 
